@@ -1,0 +1,123 @@
+#include <stdio.h>
+#include <string.h>
+
+#define MAX_EXPENSES 1000
+
+struct Expense {
+    char category[50];
+    float amount;
+};
+
+struct Expense expenses[MAX_EXPENSES];
+int count = 0;
+
+void saveExpenses() {
+    FILE *file = fopen("expenses.txt", "w");
+
+    if (file == NULL)
+        return;
+
+    for (int i = 0; i < count; i++) {
+        fprintf(file, "%s %.2f\n", expenses[i].category, expenses[i].amount);
+    }
+
+    fclose(file);
+}
+
+void loadExpenses() {
+    FILE *file = fopen("expenses.txt", "r");
+
+    if (file == NULL)
+        return;
+
+    while (fscanf(file, "%49s %f", expenses[count].category,
+                  &expenses[count].amount) == 2) {
+        count++;
+    }
+
+    fclose(file);
+}
+
+void addExpense() {
+    if (count >= MAX_EXPENSES) {
+        printf("Expense limit reached.\n");
+        return;
+    }
+
+    printf("Enter category: ");
+    scanf("%49s", expenses[count].category);
+
+    printf("Enter amount: ");
+    scanf("%f", &expenses[count].amount);
+
+    count++;
+
+    saveExpenses();
+
+    printf("Expense added successfully.\n");
+}
+
+void viewExpenses() {
+    if (count == 0) {
+        printf("No expenses found.\n");
+        return;
+    }
+
+    printf("\n%-20s %-10s\n", "Category", "Amount");
+
+    for (int i = 0; i < count; i++) {
+        printf("%-20s %.2f\n",
+               expenses[i].category,
+               expenses[i].amount);
+    }
+}
+
+void totalExpenses() {
+    float total = 0;
+
+    for (int i = 0; i < count; i++) {
+        total += expenses[i].amount;
+    }
+
+    printf("Total Expenses: %.2f\n", total);
+}
+
+int main() {
+    int choice;
+
+    loadExpenses();
+
+    do {
+        printf("\n=== Personal Expense Tracker ===\n");
+        printf("1. Add Expense\n");
+        printf("2. View Expenses\n");
+        printf("3. Show Total Expenses\n");
+        printf("4. Exit\n");
+        printf("Enter choice: ");
+        scanf("%d", &choice);
+
+        switch (choice) {
+            case 1:
+                addExpense();
+                break;
+
+            case 2:
+                viewExpenses();
+                break;
+
+            case 3:
+                totalExpenses();
+                break;
+
+            case 4:
+                printf("Exiting...\n");
+                break;
+
+            default:
+                printf("Invalid choice.\n");
+        }
+
+    } while (choice != 4);
+
+    return 0;
+}
